@@ -11,7 +11,7 @@ export const Grid: React.FC<{ grid: (Mower | null)[][] }> = ({ grid }) => {
   }, []); // L'effet s'exécute seulement au montage du composant
 
   return (
-    <div className={`grid ${isLoaded ? 'loaded' : ''}`}>
+    <div className={`grid ${isLoaded ? 'loaded' : ''}`} data-testid="grid">
       {grid
         .map((row, i) => (
           <div key={i} style={{ display: 'flex' }}>

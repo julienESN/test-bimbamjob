@@ -15,10 +15,11 @@ const App: React.FC = () => {
   // Declare and initialise state variables
   const [mowers, setMowers] = useState<Mower[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [grid, setGrid] = useState<(Mower | null)[][]>([]);
   const [isGridVisible, setIsGridVisible] = useState(false);
   // Function to handle file change
-  const handleFileChange = handleFile(setFile);
+  const handleFileChange = handleFile(setFile, setErrorMessage);
   // Function to process content
   const processContent = (content: string): [Mower[], (Mower | null)[][]] => {
     const lines = content.trim().split('\n');
@@ -99,6 +100,7 @@ const App: React.FC = () => {
     };
     // Generate grid and return processed data
     const grid = generateGrid(width, height, mowers);
+    console.log(mowers);
     return [mowers, grid];
   };
   // Function to process file on click
@@ -133,6 +135,7 @@ const App: React.FC = () => {
       <h1 style={{ marginBottom: '1rem' }}>Test Technique BimBamJob</h1>
       <input
         type="file"
+        data-testid="fileInput"
         onChange={handleFileChange}
         style={{ marginBottom: '1rem' }}
         accept=".txt" // permet de limiter les types de fichiers que l'utilisateur peut sélectionne
@@ -140,7 +143,8 @@ const App: React.FC = () => {
       <button onClick={processFileOnClick} style={{ marginBottom: '1rem' }}>
         Process file
       </button>
-      {isGridVisible && <Grid grid={grid} />}
+      {errorMessage && <p>{errorMessage}</p>}
+      {isGridVisible && <Grid data-testid="grid" grid={grid} />}
       {/* // Display each mower's data */}
       {mowers.map((mower, index) => (
         <div key={index}>
