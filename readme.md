@@ -4,6 +4,15 @@
 
 Production: https://testtechnique.vercel.app
 
+![preview](https://zupimages.net/up/23/23/94a3.gif)
+
+N'hésitez pas à me contacter pour toute question ou remarque.
+
+Esnault Julien
+julien.esnau@gmail.com
+
+Cordialement.
+/////////
 Ce projet est une simulation de tondeuse à gazon automatique programmée pour tondre des surfaces rectangulaires. La tondeuse est conçue pour parcourir l'intégralité de la surface. Pour contrôler la tondeuse, on lui envoie une séquence de lettres. Les lettres possibles sont « R », « L » et « F ».
 
 ## Comment démarrer le projet
