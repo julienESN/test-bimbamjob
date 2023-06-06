@@ -1,83 +1,31 @@
-import React, { useState } from 'react';
-import { Spinner } from 'react-bootstrap';
-// Définition du type pour une tondeuse
-type Mower = {
+// Import necessary dependencies
+import React, { useEffect, useState } from 'react';
+import { Grid } from './components/Grid';
+import { directions } from './utils/directions';
+import { handleFile } from './utils/handleFile';
+import { processFile } from './utils/processFile';
+// Define type for a Mower
+export type Mower = {
   position: [number, number];
   orientation: string;
 };
+// App Component
 
 const App: React.FC = () => {
-  // État des tondeuses
+  // Declare and initialise state variables
   const [mowers, setMowers] = useState<Mower[]>([]);
-  // État du fichier uploadé
   const [file, setFile] = useState<File | null>(null);
-  // État de la grille
   const [grid, setGrid] = useState<(Mower | null)[][]>([]);
-  // État de chargement
-  const [loading, setLoading] = useState(false);
-  // Directions pour chaque orientation
-  const directions: {
-    [key: string]: {
-      L: string;
-      R: string;
-      move: ([x, y]: [number, number]) => [number, number];
-    };
-  } = {
-    N: {
-      L: 'W',
-      R: 'E',
-      move: ([x, y]: [number, number]): [number, number] => [x, y + 1],
-    },
-    E: {
-      L: 'N',
-      R: 'S',
-      move: ([x, y]: [number, number]): [number, number] => [x + 1, y],
-    },
-    S: {
-      L: 'E',
-      R: 'W',
-      move: ([x, y]: [number, number]): [number, number] => [x, y - 1],
-    },
-    W: {
-      L: 'S',
-      R: 'N',
-      move: ([x, y]: [number, number]): [number, number] => [x - 1, y],
-    },
-  };
-  // Gère la sélection du fichier
-  const handleFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
-    setFile(file);
-  };
-  // Process le fichier
-  const processFile = () => {
-    if (file) {
-      setLoading(true); // Start loading
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const content = event.target?.result;
-        if (typeof content === 'string') {
-          console.log(`File content: ${content}`); // Log the file content
-          const [mowers, grid] = processContent(content); // processContent now returns mowers and grid
-
-          // Delay end of loading by 2 seconds
-          setTimeout(() => {
-            setLoading(false); // Stop loading
-            setMowers(mowers); // Update mowers after spinner has stopped
-            setGrid(grid); // Update grid after spinner has stopped
-          }, 2000);
-        }
-      };
-      reader.readAsText(file);
-    }
-  };
-  // Process le contenu du fichier
+  const [isGridVisible, setIsGridVisible] = useState(false);
+  // Function to handle file change
+  const handleFileChange = handleFile(setFile);
+  // Function to process content
   const processContent = (content: string): [Mower[], (Mower | null)[][]] => {
     const lines = content.trim().split('\n');
     const [width, height] = lines[0].split('').map(Number);
     const mowersData = lines.slice(1);
     const mowers: Mower[] = [];
-
+    // Loop through mowers data
     for (let i = 0; i < mowersData.length; i += 2) {
       const positionAndOrientation = mowersData[i];
       const orientationIndex = positionAndOrientation.search(/[NSEW]/);
@@ -91,26 +39,20 @@ const App: React.FC = () => {
       const y = parseInt(positionData.substring(positionSplitIndex));
       const orientation = positionAndOrientation.charAt(orientationIndex);
 
-      console.log(
-        `Processing mower with position (${x}, ${y}) and orientation ${orientation}`
-      );
-
       const instructions = mowersData[i + 1]
         .split('')
         .filter((instruction) => instruction.trim() !== '');
 
-      console.log(`Processing instructions: ${instructions.join(', ')}`);
-
       let currentX = x;
       let currentY = y;
       let currentOrientation = orientation;
-
+      // Loop through instructions
       for (const instruction of instructions) {
         const direction = directions[currentOrientation];
 
         if (!direction) {
           console.error(`Invalid orientation: ${currentOrientation}`);
-          return [[], []]; // return empty values if there's an error
+          return [[], []];
         }
 
         if (instruction === 'F') {
@@ -128,21 +70,21 @@ const App: React.FC = () => {
           const newOrientation = direction[instruction];
           if (!newOrientation) {
             console.error(`Invalid instruction: ${instruction}`);
-            return [[], []]; // return empty values if there's an error
+            return [[], []];
           }
           currentOrientation = newOrientation;
         } else {
           console.error(`Invalid instruction: ${instruction}`);
-          return [[], []]; // return empty values if there's an error
+          return [[], []];
         }
       }
-
+      // Add processed mower to the array
       mowers.push({
         position: [currentX, currentY],
         orientation: currentOrientation,
       });
     }
-
+    // Function to generate grid
     const generateGrid = (width: number, height: number, mowers: Mower[]) => {
       const grid = Array(height + 1)
         .fill(null)
@@ -155,11 +97,27 @@ const App: React.FC = () => {
 
       return grid;
     };
-
+    // Generate grid and return processed data
     const grid = generateGrid(width, height, mowers);
     return [mowers, grid];
   };
-  // Retourne l'interface utilisateur de l'application
+  // Function to process file on click
+  const processFileOnClick = processFile(
+    file,
+    setMowers,
+    setGrid,
+    processContent
+  );
+
+  useEffect(() => {
+    if (grid.length > 0) {
+      setIsGridVisible(true);
+    } else {
+      setIsGridVisible(false);
+    }
+  }, [grid]);
+
+  // Render App Component
   return (
     <div
       style={{
@@ -172,49 +130,18 @@ const App: React.FC = () => {
         fontFamily: 'Roboto, sans-serif',
       }}
     >
-      <h1 style={{ marginBottom: '1rem' }}>Gestion des tondeuses</h1>
+      <h1 style={{ marginBottom: '1rem' }}>Test Technique BimBamJob</h1>
       <input
         type="file"
-        onChange={handleFile}
+        onChange={handleFileChange}
         style={{ marginBottom: '1rem' }}
+        accept=".txt" // permet de limiter les types de fichiers que l'utilisateur peut sélectionne
       />
-      <button onClick={processFile} style={{ marginBottom: '1rem' }}>
+      <button onClick={processFileOnClick} style={{ marginBottom: '1rem' }}>
         Process file
       </button>
-      {loading && <Spinner animation="border" />}{' '}
-      {/* Afficher le spinner lors du chargement */}
-      <div>
-        {grid
-          .map((row, i) => (
-            <div key={i} style={{ display: 'flex' }}>
-              {row.map((cell, j) => (
-                <div
-                  key={j}
-                  title={
-                    cell
-                      ? `Tondeuse à la position: ${cell.position.join(
-                          ', '
-                        )} avec orientation: ${cell.orientation}`
-                      : ''
-                  }
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '50px',
-                    height: '50px',
-                    border: '1px solid black',
-                    backgroundColor: cell ? '#baf' : '#eee',
-                    cursor: cell ? 'pointer' : 'default',
-                  }}
-                >
-                  {cell && <span>{(cell as Mower).orientation}</span>}
-                </div>
-              ))}
-            </div>
-          ))
-          .reverse()}
-      </div>
+      {isGridVisible && <Grid grid={grid} />}
+      {/* // Display each mower's data */}
       {mowers.map((mower, index) => (
         <div key={index}>
           Pour la Tondeuse {index + 1}, Position: {mower.position.join(', ')},

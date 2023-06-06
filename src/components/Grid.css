@@ -1,0 +1,13 @@
+.grid {
+  opacity: 0;
+}
+
+.grid.loaded {
+  animation: fadeIn 2s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
