@@ -1,0 +1,33 @@
+.grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-cell {
+  width: 50px;
+  height: 50px;
+  border: 1px solid #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mower {
+  color: green;
+}
+
+.mower-N:after {
+  content: '↑';
+}
+
+.mower-E:after {
+  content: '→';
+}
+
+.mower-S:after {
+  content: '↓';
+}
+
+.mower-W:after {
+  content: '←';
+}
